@@ -34,8 +34,24 @@
     [self loadItems];
     
     [self.tableView reloadData];
+
+    [self setNavigationBarAppearance];
 }
 
+- (UIColor *)crashCourseBlue
+{
+    return [UIColor colorWithRed:0.235 green:0.482 blue:0.855 alpha:1];
+}
+
+- (void)setNavigationBarAppearance
+{
+    self.navigationController.navigationBar.barTintColor = [self crashCourseBlue];
+    self.navigationController.navigationBar.translucent = NO;
+    
+    [self.navigationController.navigationBar setTitleTextAttributes:@{
+                                                                      NSForegroundColorAttributeName : [UIColor whiteColor]
+                                                                      }];
+}
 
 // Return a filePath (i.e., where we want to store our plist file)
 - (NSString *)filePath
@@ -136,6 +152,8 @@
     
     // Set the cell's date label to the date string
     [[cell itemDateCreated] setText:dateString];
+    
+    [[cell checkmarkBox] setBackgroundColor:[self crashCourseBlue]];
     
     // If the item's completed property is YES/true, use UIView's alpha property to fade the cell out.
     if ([item completed]) {
