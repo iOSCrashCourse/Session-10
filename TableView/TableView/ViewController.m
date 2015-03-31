@@ -53,7 +53,7 @@
     
     // Check if NSKeyedUnarchiver returns a nil value
     if ([NSKeyedUnarchiver unarchiveObjectWithFile:filePath]) {
-
+        
         // If not, the file exists. Set self.items to the archived array
         self.items = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
     }
@@ -84,10 +84,16 @@
     [[self itemTextField] setText:@""];
     
     // Because we changed our tableView data set, we have to tell it to reload/refresh
-    [[self tableView] reloadData];
+//    [[self tableView] reloadData];
     
     // Finally, hide the keyboard (which is the UITextField's firstResponder)
     [[self itemTextField] resignFirstResponder];
+    
+    [self.tableView beginUpdates];
+    
+    [self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:[self.tableView numberOfRowsInSection:0] inSection:0]] withRowAnimation:UITableViewRowAnimationAutomatic];
+    
+    [self.tableView endUpdates];
     
     // Call persistItems again to save our changes
     [self persistItems];
@@ -97,7 +103,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     /*
-     This asks the table view if it has any cells that are not in use (i.e., created earlier 
+     This asks the table view if it has any cells that are not in use (i.e., created earlier
      but are now offscreen). If there is, our table view will re-use that cell.
      Our cellIdentifier is some NSString that identifies which cells we can re-use.
      */
@@ -117,7 +123,7 @@
     
     Item* item = [[self items] objectAtIndex:indexPath.row];
     NSString* itemName = [item itemTitle];
-
+    
     [[cell itemTitle] setText:itemName];
     
     // Get the item's NSDate that represents when the item was created
@@ -150,6 +156,26 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     return [[self items] count];
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    // Return YES if you want the row to be editable
+    return YES;
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        
+        [self.tableView beginUpdates];
+        
+        [self.items removeObjectAtIndex:indexPath.row];
+        
+        [self.tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:indexPath.row inSection:indexPath.section]] withRowAnimation:UITableViewRowAnimationAutomatic];
+        
+        [self.tableView endUpdates];
+        
+        [self persistItems];
+    }
 }
 
 // Toggle completed is called when the UITapGestureRecognizer that we added to the checkmark box is tapped. The sender argument (of type "id") is actually of type UITapGestureRecognizer
